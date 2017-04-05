@@ -12,22 +12,8 @@ keys =  ['value', 'name', 'category', 'class',
     'numeric_value', 'mirrored', 'unicode_name', 'comment', 'uppercase_mapping',
     'lowercase_mapping', 'titlecase_mapping'],
 systemfiles = [
-    "/usr/share/unicode/UnicodeData.txt", // debian
-    "/usr/share/unicode-data/UnicodeData.txt", // gentoo
-    "/usr/share/unicode/ucd/UnicodeData.txt", // CentOS
-    process.env.NODE_UNICODETABLE_UNICODEDATA_TXT || "UnicodeData.txt", // manually downloaded
+    "UnicodeData.txt"
 ],
-unicodedatafile = {
-    host: "unicode.org",
-    path: "/Public/UNIDATA/UnicodeData.txt",
-    method: 'GET',
-    port:80,
-},
-
- proxyServer = process.env.HTTPS_PROXY
-            || process.env.https_proxy
-            || process.env.HTTP_PROXY
-            || process.env.http_proxy,
 
 refs = 0;
 
@@ -122,62 +108,16 @@ function read_file(success_cb, error_cb) {
     try_reading(success_cb, error_cb);
 }
 
-function download_file(callback) {
-    var timeouthandle = null;
-    console.log("%s %s:%d%s", unicodedatafile.method, unicodedatafile.host,
-                unicodedatafile.port, unicodedatafile.path);
-
-    if (proxyServer) {
-        var proxyVars = proxyServer.match(/^([^:/]*:[/]{2})?([^:/]+)(:([0-9]+))?/i);
-
-        console.log('Proxy server detected, using proxy settings to download (%s)', proxyServer);
-
-        unicodedatafile.path = unicodedatafile.host
-                             + ":"
-                             + unicodedatafile.port
-                             + unicodedatafile.path;
-        unicodedatafile.host = proxyVars[2];
-        unicodedatafile.port = proxyVars[4];
-    }
-
-    http.get(unicodedatafile, function (res) {
-        console.log("fetching …");
-
-        // stop timeout couting
-        if (timeouthandle)
-            clearTimeout(timeouthandle);
-
-        res.setEncoding('utf8');
-        res.pipe(parser(callback));
-    }).on('error', function (err) {
-        console.error("Error while downloading %s: %s",
-                      path.basename(unicodedatafile.path), err);
-        console.log("Please download file manually,",
-                    "put it next to the install.js file and",
-                    "run `node install.js` again.");
-        callback(1);
-    });
-    timeouthandle = setTimeout(function () {
-        console.error("request timed out.");
-        callback(1);
-    }, 30 * 1000);
-}
-
-
 // run
 if (!module.parent) { // not required
-    read_file(process.exit, function () {
-        console.log("try to download …");
-        download_file(process.exit);
-    });
+    read_file(process.exit, process.exit);
 } else {
     module.exports = {
         escape:escape,
         stringify:stringify,
         newFile:newFile,
         parser:parser,
-        read_file:read_file,
-        download_file:download_file,
+        read_file:read_file
     };
 }
 
