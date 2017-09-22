@@ -41,6 +41,7 @@ function newFile(name, callback) {
 }
 
 function parser(callback) {
+    console.log("parsing …");
     let data = {};
     const buffer = new BufferStream({encoding:'utf8', size:'flexible'});
     const resume = buffer.resume.bind(buffer);
@@ -87,16 +88,10 @@ function parser(callback) {
 }
 
 // run
-if (!module.parent) { // not required
-    console.log("parsing …");
+if (!module.parent) {
+    console.log("downloading …");
     request(package.config.unicodedata).pipe(parser(process.exit));
 } else {
-    module.exports = {
-        escape:escape,
-        stringify:stringify,
-        newFile:newFile,
-        parser:parser,
-        read_file:read_file
-    };
+    console.error("The `unicode` generate script should not be run as a module!");
+    process.exit(1);
 }
-
