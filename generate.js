@@ -1,25 +1,24 @@
 #!/usr/bin/env node
 //
 
-var fs  = require('fs'),
-    path = require('path'),
-    http = require('http'),
-    request = require('request'),
-    package = require('./package.json'),
-    BufferStream = require('bufferstream'),
+const fs  = require('fs');
+const path = require('path');
+const request = require('request');
+const package = require('./package.json');
+const BufferStream = require('bufferstream');
 
 // http://www.ksu.ru/eng/departments/ktk/test/perl/lib/unicode/UCDFF301.html
-keys =  ['value', 'name', 'category', 'class',
+const keys =  ['value', 'name', 'category', 'class',
     'bidirectional_category', 'mapping', 'decimal_digit_value', 'digit_value',
     'numeric_value', 'mirrored', 'unicode_name', 'comment', 'uppercase_mapping',
-    'lowercase_mapping', 'titlecase_mapping'],
+    'lowercase_mapping', 'titlecase_mapping'];
 
-refs = 0;
+let refs = 0;
 
 // based on https://github.com/mathiasbynens/jsesc
 function escape(charValue) {
-    var hexadecimal = charValue.replace(/^0*/, ''); // is already in hexadecimal
-    var longhand = hexadecimal.length > 2;
+    const hexadecimal = charValue.replace(/^0*/, ''); // is already in hexadecimal
+    const longhand = hexadecimal.length > 2;
     return '\\' + (longhand ? 'u' : 'x') +
             ('0000' + hexadecimal).slice(longhand ? -4 : -2);
 }
@@ -29,8 +28,8 @@ function stringify(key, value) {
 }
 
 function newFile(name, callback) {
-    var filename = path.join(__dirname, "category", name + ".js"),
-        file = fs.createWriteStream(filename, {encoding:'utf8'});
+    const filename = path.join(__dirname, "category", name + ".js");
+    const file = fs.createWriteStream(filename, {encoding:'utf8'});
     file.once('close', function () {
         if (!--refs) {
             console.log("done.");
@@ -42,9 +41,9 @@ function newFile(name, callback) {
 }
 
 function parser(callback) {
-    var data = {},
-        buffer = new BufferStream({encoding:'utf8', size:'flexible'}),
-        resume = buffer.resume.bind(buffer);
+    let data = {};
+    const buffer = new BufferStream({encoding:'utf8', size:'flexible'});
+    const resume = buffer.resume.bind(buffer);
 
     buffer.split('\n', function (line) {
         var v, c, char = {},
