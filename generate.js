@@ -4,6 +4,8 @@
 var fs  = require('fs'),
     path = require('path'),
     http = require('http'),
+    request = require('request'),
+    package = require('./package.json'),
     BufferStream = require('bufferstream'),
 
 // http://www.ksu.ru/eng/departments/ktk/test/perl/lib/unicode/UCDFF301.html
@@ -11,12 +13,8 @@ keys =  ['value', 'name', 'category', 'class',
     'bidirectional_category', 'mapping', 'decimal_digit_value', 'digit_value',
     'numeric_value', 'mirrored', 'unicode_name', 'comment', 'uppercase_mapping',
     'lowercase_mapping', 'titlecase_mapping'],
-systemfiles = [
-    "UnicodeData.txt"
-],
 
 refs = 0;
-
 
 // based on https://github.com/mathiasbynens/jsesc
 function escape(charValue) {
@@ -89,28 +87,10 @@ function parser(callback) {
     return buffer;
 }
 
-function read_file(success_cb, error_cb) {
-    var systemfile, sysfiles = systemfiles.slice(),
-    try_reading = function (success, error) {
-        systemfile = sysfiles.shift();
-        if (!systemfile) return error_cb();
-        console.log("try to read file %s …", systemfile);
-        fs.exists(systemfile, function (exists) {
-            if (!exists) {
-                console.error("%s not found.", systemfile);
-                return try_reading(success_cb, error_cb);
-            }
-            console.log("parsing …");
-            fs.createReadStream(systemfile, {encoding:'utf8'}).pipe(parser(success_cb));
-        });
-
-    };
-    try_reading(success_cb, error_cb);
-}
-
 // run
 if (!module.parent) { // not required
-    read_file(process.exit, process.exit);
+    console.log("parsing …");
+    request(package.config.unicodedata).pipe(parser(process.exit));
 } else {
     module.exports = {
         escape:escape,

@@ -15,15 +15,18 @@
   "engines": {
     "node": ">= 0.8.x"
   },
+  "config": {
+    "unicodedata": "https://unicode.org/Public/10.0.0/ucd/UnicodeData.txt"
+  },
   "scripts": {
-    "download": "curl \"https://unicode.org/Public/10.0.0/ucd/UnicodeData.txt\" > UnicodeData.txt",
     "generate": "node generate.js",
     "test": "node test.js",
     "np": "np"
   },
   "devDependencies": {
     "bufferstream": ">= 0.6.2",
-    "np": "2.13.1"
+    "np": "2.13.1",
+    "request": "^2.82.0"
   },
   "licenses": [
     {
